@@ -1,0 +1,22 @@
+# Build output
+**/bin/
+**/obj/
+
+# JetBrains Rider
+.idea/
+**/.idea/
+*.sln.iml
+
+# User-specific IDE files
+*.user
+*.suo
+
+# Test results and coverage
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Operating system files
+.DS_Store
+Thumbs.db
