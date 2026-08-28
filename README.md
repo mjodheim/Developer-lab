@@ -55,22 +55,6 @@ Chaque exercice doit pouvoir répondre à quatre questions simples : **qu'est-ce
 
 La liste est volontairement ambitieuse. Certains projets resteront de petits exercices d'une compétence précise ; d'autres pourront évoluer vers des applications de portfolio avec tests, documentation, Docker et CI/CD.
 
-### Projet actuel — Bug Zoo
-
-**Bug Zoo** est une application console C# volontairement défectueuse. Le but n'est pas de la réécrire, mais de comprendre ses défauts et de les réparer méthodiquement.
-
-Le travail porte notamment sur :
-
-- la lecture et le débogage de code existant ;
-- les limites des collections et l'exposition de l'état interne ;
-- la gestion des valeurs absentes et des erreurs contrôlées ;
-- les calculs décimaux et les comparaisons insensibles à la casse ;
-- l'encapsulation et les invariants métier ;
-- la prévention des mutations accidentelles ;
-- la mise en place progressive de tests de régression.
-
-Les principales corrections de conception sont déjà implémentées. La prochaine étape consiste à compléter la suite de tests automatisés et à documenter les défauts corrigés avant de considérer l'exercice terminé.
-
 ### Standard des projets
 
 À mesure que le dépôt grandit, les projets suffisamment importants viseront une structure proche de celle-ci :
@@ -140,22 +124,6 @@ Each exercise should ultimately answer four simple questions: **what did I build
 | 15 | Microservices Disaster Simulator | Multi-language | Messaging, resilience and observability | Planned |
 
 The roadmap is deliberately ambitious. Some entries will remain short, focused exercises; others may grow into portfolio-grade applications with tests, documentation, Docker and CI/CD.
-
-### Current project — Bug Zoo
-
-**Bug Zoo** is a deliberately defective C# console application. The goal is not to rewrite it, but to understand its defects and repair them methodically.
-
-The exercise currently covers:
-
-- reading and debugging unfamiliar code;
-- collection boundaries and exposure of internal state;
-- missing-value handling and controlled failures;
-- decimal calculations and case-insensitive comparison;
-- encapsulation and business invariants;
-- preventing accidental state mutation;
-- progressively introducing regression tests.
-
-The main design and debugging corrections are already implemented. The next step is to complete the automated test suite and document the repaired defects before considering the exercise finished.
 
 ### Project standard
 
