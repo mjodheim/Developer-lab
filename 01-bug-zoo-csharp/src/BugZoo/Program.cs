@@ -57,10 +57,20 @@ static void PrintMenu()
 
 static void ListAnimals(ZooService zoo)
 {
-    IReadOnlyList<Animal> animals = zoo.GetAllAnimals();
-    // Attendu 4 animaux, affiché 3 → l'erreur vient de "index < animals.Count -1"
-    // for (int index = 0; index < animals.Count - 1; index++) PrintAnimal(animals[index]);
-    for (int index = 0; index < animals.Count; index++) PrintAnimal(animals[index]);
+    IReadOnlyList<ZooService.AnimalSnapshot> animals = zoo.GetAllAnimals();
+
+    foreach (ZooService.AnimalSnapshot  animal in animals)
+    {
+        PrintAnimalSnapshot(animal);
+    }
+}
+
+static void PrintAnimalSnapshot(ZooService.AnimalSnapshot animal)
+{
+    Console.WriteLine(
+        $"#{animal.Id} — {animal.Name}, {animal.Species}, " +
+        $"age {animal.Age}, {animal.DailyFoodKg:0.00} kg/day, " +
+        $"enclosure {animal.EnclosureNumber}");
 }
 
 static void FindAnimal(ZooService zoo)
@@ -74,7 +84,7 @@ static void SearchBySpecies(ZooService zoo)
 {
     Console.Write("Species: ");
     string species = Console.ReadLine()!;
-    foreach (Animal animal in zoo.SearchBySpecies(species)) PrintAnimal(animal);
+    foreach (ZooService.AnimalSnapshot animal in zoo.SearchBySpecies(species)) PrintAnimal(animal);
 }
 
 static void AddAnimal(ZooService zoo)
@@ -106,7 +116,8 @@ static void MoveAnimal(ZooService zoo)
     Console.WriteLine("Animal moved.");
 }
 
-static void PrintAnimal(Animal animal)
+static void PrintAnimal(ZooService.AnimalSnapshot animal)
 {
-    Console.WriteLine($"#{animal.Id} — {animal.Name}, {animal.Species}, age {animal.Age}, {animal.DailyFoodKg:0.00} kg/day, enclosure {animal.EnclosureNumber}");
+    Console.WriteLine($"#{animal.Id} — {animal.Name}, {animal.Species}, age {animal.Age}," +
+                      $" {animal.DailyFoodKg:0.00} kg/day, enclosure {animal.EnclosureNumber}");
 }

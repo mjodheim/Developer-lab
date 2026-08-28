@@ -5,22 +5,52 @@ public class ZooService
     private readonly List<Animal> _animals;
 
     public ZooService(IEnumerable<Animal> animals) => _animals = animals.ToList();
-
-    public IReadOnlyList<Animal> GetAllAnimals() => _animals;
-
-    public Animal FindById(int id) => _animals.First(animal => animal.Id == id);
-
-    public IEnumerable<Animal> SearchBySpecies(string species)
+    
+    public sealed record AnimalSnapshot(
+        int Id,
+        string Name,
+        string Species,
+        int Age,
+        decimal DailyFoodKg,
+        int EnclosureNumber);
+    
+    public IReadOnlyList<AnimalSnapshot> GetAllAnimals() => _animals
+        .Select(animal => new AnimalSnapshot(
+            animal.Id,
+            animal.Name,
+            animal.Species,
+            animal.Age,
+            animal.DailyFoodKg,
+            animal.EnclosureNumber))
+        .ToList()
+        .AsReadOnly();
+    
+    public AnimalSnapshot FindById(int animalId)
     {
-        // Bug trouvé sur le case sensitive
-        // return _animals.Where(animal => animal.Species == species);
-        return _animals.Where(animal => animal.Species.ToLower().Equals(species.ToLower())); 
+        Animal animal = FindEntityById(animalId);
+
+        return new AnimalSnapshot(
+            animal.Id,
+            animal.Name,
+            animal.Species,
+            animal.Age,
+            animal.DailyFoodKg,
+            animal.EnclosureNumber);
+    }
+    private Animal FindEntityById(int animalId)
+    {
+        return _animals.FirstOrDefault(animal => animal.Id == animalId)
+               ?? throw new KeyNotFoundException(
+                   $"No animal found with id {animalId}.");
+    }
+
+    public IEnumerable<AnimalSnapshot> SearchBySpecies(string species)
+    {
+        return GetAllAnimals().Where(animal => string.Equals(animal.Species, species, StringComparison.OrdinalIgnoreCase)); 
     }
 
     public void AddAnimal(Animal animal)
     {
-        // Bug trouvé : la condition est inversée ici et il faut remplacer .All par .Any
-        // if (_animals.All(existing => existing.Id != animal.Id))
         if (_animals.Any(existing => existing.Id.Equals(animal.Id)))
         {
             throw new InvalidOperationException("An animal with this identifier already exists.");
@@ -29,27 +59,27 @@ public class ZooService
         _animals.Add(animal);
     }
 
+    
     public void MoveAnimal(int animalId, int newEnclosureNumber)
     {
-        Animal animal = FindById(animalId);
-        animal.EnclosureNumber = newEnclosureNumber;
+        Animal animal = FindEntityById(animalId);
+        animal.MoveToEnclosure(newEnclosureNumber);
     }
 
     public decimal CalculateTotalDailyFood()
     {
-        // Bug trouvé : on attend un decimal pas un int
-        // return _animals.Sum(animal => (int)animal.DailyFoodKg);
         return _animals.Sum(animal => animal.DailyFoodKg);
     }
 
     public IReadOnlyList<string> GenerateFeedingReport()
     {
-        _animals.Sort((left, right) => left.EnclosureNumber.CompareTo(right.EnclosureNumber));
-
+        IEnumerable<Animal> animalsByEnclosure = _animals.OrderBy(animal => animal.EnclosureNumber);
+        
         List<string> lines = [];
-        foreach (Animal animal in _animals)
+        foreach (Animal animal in animalsByEnclosure)
         {
-            lines.Add($"Enclosure {animal.EnclosureNumber}: {animal.Name} ({animal.Species}) — {animal.DailyFoodKg:0.00} kg");
+            lines.Add($"Enclosure {animal.EnclosureNumber}: {animal.Name} ({animal.Species}) — " +
+                      $"{animal.DailyFoodKg:0.00} kg");
         }
 
         return lines;
