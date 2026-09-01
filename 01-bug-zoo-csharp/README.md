@@ -20,7 +20,7 @@ The work performed on the application includes:
 
 - fixing an off-by-one error that omitted the last animal from the list;
 - making species searches case-insensitive without manual string normalisation;
-- preventing duplicate identifiers when animals are added;
+- preventing duplicate identifiers both during service construction and when animals are added later;
 - preserving decimal precision when calculating food totals;
 - replacing uncontrolled lookup failures with a clear `KeyNotFoundException`;
 - validating animal state at construction time;
@@ -46,7 +46,8 @@ The detailed defect-by-defect analysis is available in [`BUG_REPORT.md`](./BUG_R
 - avoiding accidental state mutation;
 - immutable snapshots / read models;
 - xUnit `[Fact]` and `[Theory]` tests;
-- automated regression testing.
+- automated regression testing;
+- reusing a single validation path so construction and later mutations enforce the same rule.
 
 ## Project structure
 
@@ -81,7 +82,7 @@ dotnet run --project src/BugZoo
 dotnet test
 ```
 
-The current suite covers constructor validation, enclosure changes, lookups, case-insensitive searches, duplicate additions, food totals, report ordering and protection against unintended collection reordering.
+The suite covers constructor validation, enclosure changes, lookups, case-insensitive searches, duplicate identifiers, food totals, report ordering and protection against unintended collection reordering.
 
 ## Development approach
 
@@ -98,10 +99,10 @@ The Git history intentionally reflects that progression: initial debugging, doma
 
 ## Current status
 
-The main defects found during the exercise are repaired and covered by automated tests.
+The known defects identified during the exercise are repaired and have regression coverage in the test project.
 
-One final invariant is still worth tightening before marking the exercise fully complete: `AddAnimal` prevents duplicate identifiers, but the `ZooService` constructor currently copies its initial collection directly. Therefore, an initial collection containing duplicate IDs can still create an invalid service state. The final correction should make construction enforce the same uniqueness rule and add the corresponding regression test.
+The final service-level invariant was also tightened: the `ZooService` constructor now routes its initial animals through `AddAnimal`, so duplicate identifiers cannot bypass the same uniqueness rule enforced for later additions. A dedicated regression test covers this construction path.
 
-After that, the exercise can be considered complete once the full test suite passes.
+The implementation is considered complete. Run `dotnet test` locally to validate the full suite in the target .NET environment.
 
 See [`EXERCISE.md`](./EXERCISE.md) for the original brief.
