@@ -14,6 +14,16 @@ public class ZooServiceTests
     }
 
     [Fact]
+    public void Constructor_WithDuplicateIds_ThrowsInvalidOperationException()
+    {
+        Assert.Throws<InvalidOperationException>(() =>
+            new ZooService([
+                new Animal(1, "Nala", "Lion", 8, 6.5m, 3),
+                new Animal(1, "Kito", "Giraffe", 5, 12.75m, 1)
+            ]));
+    }
+
+    [Fact]
     public void FindById_WithTwoAnimals_ReturnsCorrectAnimal()
     {
         ZooService zoo = new([
