@@ -4,7 +4,15 @@ public class ZooService
 {
     private readonly List<Animal> _animals;
 
-    public ZooService(IEnumerable<Animal> animals) => _animals = animals.ToList();
+    public ZooService(IEnumerable<Animal> animals)
+    {
+        _animals = [];
+
+        foreach (Animal animal in animals)
+        {
+            AddAnimal(animal);
+        }
+    }
     
     public sealed record AnimalSnapshot(
         int Id,
@@ -51,7 +59,7 @@ public class ZooService
 
     public void AddAnimal(Animal animal)
     {
-        if (_animals.Any(existing => existing.Id.Equals(animal.Id)))
+        if (_animals.Any(existing => existing.Id == animal.Id))
         {
             throw new InvalidOperationException("An animal with this identifier already exists.");
         }
