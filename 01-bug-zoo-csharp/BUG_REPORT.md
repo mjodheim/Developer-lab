@@ -70,40 +70,51 @@ Prefer comparison APIs that explicitly describe the required semantics instead o
 
 ## 3. Duplicate animal identifiers were accepted incorrectly
 
-**Status:** Resolved for `AddAnimal`; one constructor edge case remains
+**Status:** Resolved
 
 ### Symptom
 
-The add operation used the wrong collection predicate and therefore did not enforce the uniqueness rule correctly.
+The add operation originally used the wrong collection predicate and therefore did not enforce the uniqueness rule correctly.
+
+A second path could also bypass the rule: the `ZooService` constructor copied its initial collection directly, so duplicate identifiers could exist immediately after construction even though `AddAnimal` rejected them later.
 
 ### Cause
 
-The original condition used `All` with an inverted meaning. The business question is simpler: "does an animal with this ID already exist?"
+The original add condition used `All` with an inverted meaning. The constructor also had a separate initialization path that did not reuse the uniqueness validation.
+
+The business question is simpler: "does an animal with this ID already exist?"
 
 ### Fix
 
 `AddAnimal` checks the collection with `Any` and throws an `InvalidOperationException` when the identifier already exists.
 
+The constructor now starts with an empty internal collection and routes every initial animal through `AddAnimal`:
+
+```csharp
+public ZooService(IEnumerable<Animal> animals)
+{
+    _animals = [];
+
+    foreach (Animal animal in animals)
+    {
+        AddAnimal(animal);
+    }
+}
+```
+
+This means the same uniqueness rule protects both construction and later additions instead of being implemented twice.
+
 ### Regression coverage
 
+- `Constructor_WithDuplicateIds_ThrowsInvalidOperationException`
 - `AddAnimal_WithDuplicateId_ThrowsInvalidOperationException`
 - `AddAnimal_WithUniqueId_AddsAnimal`
 
-The duplicate test also verifies that the collection remains unchanged after the rejected operation.
-
-### Remaining edge case
-
-The current `ZooService` constructor still copies its initial `IEnumerable<Animal>` directly with `ToList()`. An initial collection containing duplicate IDs can therefore bypass the rule enforced by `AddAnimal`.
-
-The final repair should make construction enforce the same uniqueness invariant and add a test such as:
-
-```text
-Constructor_WithDuplicateIds_ThrowsInvalidOperationException
-```
+The duplicate-add test also verifies that the collection remains unchanged after the rejected operation.
 
 ### Lesson
 
-A business invariant must hold for every path that can create or modify an object's state, including construction.
+A business invariant must hold for every path that can create or modify an object's state, including construction. Reusing one validation path also reduces the risk of two implementations of the same rule drifting apart.
 
 ---
 
@@ -135,7 +146,7 @@ The tested example verifies that `6.50 + 12.75` produces `19.25`.
 
 ### Lesson
 
-Numeric types are part of the business model. Converting monetary or measured decimal values to integers can silently corrupt results.
+Numeric types are part of the business model. Converting measured decimal values to integers can silently corrupt results.
 
 ---
 
@@ -343,6 +354,7 @@ It includes:
 - boundary tests using zero and negative values;
 - `[Theory]` tests to cover several invalid values with one behavioural rule;
 - state-preservation assertions after failed operations;
+- a constructor-level invariant test for duplicate identifiers;
 - a side-effect regression test proving that report generation does not reorder stored animals.
 
 This progression is visible in the Git history: the application was first debugged and hardened, then the xUnit suite was introduced and expanded in several passes.
@@ -356,8 +368,9 @@ Bug Zoo reinforced several principles that scale beyond this small console appli
 - reproduce a defect before repairing it;
 - fix the cause rather than only the visible symptom;
 - keep corrections focused;
-- protect domain invariants at their boundaries;
+- protect domain invariants at every creation and mutation boundary;
 - make invalid state difficult to represent;
+- reuse validation logic rather than duplicating business rules;
 - distinguish read models from mutable domain entities;
 - make failure modes explicit;
 - avoid hidden mutations in query operations;
