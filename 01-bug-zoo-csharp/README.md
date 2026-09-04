@@ -103,6 +103,18 @@ The known defects identified during the exercise are repaired and have regressio
 
 The final service-level invariant was also tightened: the `ZooService` constructor now routes its initial animals through `AddAnimal`, so duplicate identifiers cannot bypass the same uniqueness rule enforced for later additions. A dedicated regression test covers this construction path.
 
-The implementation is considered complete. Run `dotnet test` locally to validate the full suite in the target .NET environment.
+The implementation is considered complete.
+
+The complete test suite has been executed successfully on .NET 10:
+
+- ✅ 26 passed
+- ❌ 0 failed
+- ⏭️ 0 skipped
 
 See [`EXERCISE.md`](./EXERCISE.md) for the original brief.
+
+## Test results
+
+The final test suite contains 26 automated tests covering domain validation, service behaviour, business invariants, collection integrity and regression scenarios.
+
+![BugZoo test suite passing](docs/images/tests-passing.png)
